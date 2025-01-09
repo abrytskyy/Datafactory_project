@@ -1,0 +1,32 @@
+{
+	"name": "AzureDataLakeStorageLS",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"parameters": {
+			"url": {
+				"type": "string",
+				"defaultValue": "https://p8a.dfs.core.windows.net/"
+			},
+			"secret_name": {
+				"type": "string",
+				"defaultValue": "p8akey"
+			}
+		},
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "@{linkedService().url}",
+			"accountKey": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "AzureKeyVaultLS",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": {
+					"value": "@linkedService().secret_name",
+					"type": "Expression"
+				}
+			}
+		}
+	}
+}

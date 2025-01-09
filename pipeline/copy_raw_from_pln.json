@@ -1,0 +1,223 @@
+{
+	"name": "copy_raw_from_pln",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Metadata1",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "metadata_from_pln",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@activity('Lookup1').output.firstRow['SOURCE_CONTAINER']",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@activity('Lookup1').output.firstRow['SOURCE_DIRECTORY']",
+								"type": "Expression"
+							},
+							"url": {
+								"value": "@activity('Lookup1').output.firstRow['SOURCE_STORAGE_URL']",
+								"type": "Expression"
+							},
+							"secret_name": {
+								"value": "@activity('Lookup1').output.firstRow['SOURCE_SECRETKEY']",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			},
+			{
+				"name": "ForEach",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Metadata1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Metadata1').output.childItems",
+						"type": "Expression"
+					},
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "Copy from pln",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "files_from_pln",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@activity('Lookup1').output.firstRow.SOURCE_CONTAINER",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@activity('Lookup1').output.firstRow.SOURCE_DIRECTORY",
+											"type": "Expression"
+										},
+										"file_name": {
+											"value": "@item().name",
+											"type": "Expression"
+										},
+										"storage_url": {
+											"value": "@activity('Lookup1').output.firstRow.SOURCE_STORAGE_URL",
+											"type": "Expression"
+										},
+										"storage_secret_name": {
+											"value": "@activity('Lookup1').output.firstRow.SOURCE_SECRETKEY",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "files_sink",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@activity('Lookup1').output.firstRow['SINK_CONTAINER']",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@activity('Lookup1').output.firstRow['SINK_DIRECTORY']",
+											"type": "Expression"
+										},
+										"file_name": {
+											"value": "@item().name",
+											"type": "Expression"
+										},
+										"storage_url": {
+											"value": "@activity('Lookup1').output.firstRow['SINK_STORAGE_URL']",
+											"type": "Expression"
+										},
+										"storage_secret_name": {
+											"value": "@activity('Lookup1').output.firstRow['SINK_SECRETKEY']",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "Lookup1",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT * FROM dbo.CSV_INFORMATION \nWHERE INSTANCE = '@{pipeline().parameters.instance}'\n",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "AzureSqlTableDS",
+						"type": "DatasetReference"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"instance": {
+				"type": "string",
+				"defaultValue": "shop1"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-01-03T12:30:03Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

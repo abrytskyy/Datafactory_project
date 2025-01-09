@@ -1,0 +1,9 @@
+{
+	"name": "p8a",
+	"location": "norwayeast",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "316853d4-87da-43b6-9909-5df88b10746b",
+		"tenantId": "b8b16f98-ca9f-4f9b-9f3c-9b7988cdde94"
+	}
+}

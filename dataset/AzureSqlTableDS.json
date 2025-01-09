@@ -1,0 +1,54 @@
+{
+	"name": "AzureSqlTableDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabaseLS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "INSTANCE",
+				"type": "varchar"
+			},
+			{
+				"name": "SOURCE_CONTAINER",
+				"type": "varchar"
+			},
+			{
+				"name": "SOURCE_DIRECTORY",
+				"type": "varchar"
+			},
+			{
+				"name": "SINK_CONTAINER",
+				"type": "varchar"
+			},
+			{
+				"name": "SINK_DIRECTORY",
+				"type": "varchar"
+			},
+			{
+				"name": "SOURCE_SECRETKEY",
+				"type": "varchar"
+			},
+			{
+				"name": "SINK_SECRETKEY",
+				"type": "varchar"
+			},
+			{
+				"name": "SOURCE_STORAGE_URL",
+				"type": "varchar"
+			},
+			{
+				"name": "SINK_STORAGE_URL",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "CSV_INFORMATION"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
